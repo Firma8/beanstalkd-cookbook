@@ -7,6 +7,8 @@
 
 package 'beanstalkd' do
   action :upgrade
+  notifies :start, 'service[beanstalkd]'
+  notifies :enable, 'service[beanstalkd]' if node['beanstalkd']['enable_startup']
 end
 
 template '/etc/default/beanstalkd' do
@@ -18,12 +20,10 @@ template '/etc/default/beanstalkd' do
   notifies :restart, 'service[beanstalkd]'
 end
 
-svc = service 'beanstalkd' do
+service 'beanstalkd' do
   start_command '/etc/init.d/beanstalkd start'
   stop_command '/etc/init.d/beanstalkd stop'
   status_command '/etc/init.d/beanstalkd status'
   supports [:start, :stop, :status]
   action :nothing
 end
-
-svc.run_action(:enable) if node['beanstalkd']['enable_startup']
